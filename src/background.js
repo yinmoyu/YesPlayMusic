@@ -66,7 +66,7 @@ const closeOnLinux = (e, win, store) => {
           win.hide(); //调用 最小化实例方法
         } else if (result.response === 1) {
           win = null;
-          app.exit(); //exit()直接关闭客户端，不会执行quit();
+          app.exit(); // exit()直接关闭客户端，不会执行quit();
         }
       })
       .catch(err => {
@@ -153,7 +153,7 @@ class Background {
 
     const expressApp = express();
     expressApp.use('/', express.static(__dirname + '/'));
-    expressApp.use('/api', expressProxy('http://127.0.0.1:10754'));
+    expressApp.use('/api', expressProxy('http://127.0.0.1:35216'));
     expressApp.use('/player', (req, res) => {
       this.window.webContents
         .executeJavaScript('window.yesplaymusic.player')
@@ -166,7 +166,7 @@ class Background {
           });
         });
     });
-    this.expressApp = expressApp.listen(27232, '127.0.0.1');
+    this.expressApp = expressApp.listen(41342, '127.0.0.1');
   }
 
   createWindow() {
@@ -257,8 +257,8 @@ class Background {
       createProtocol('app');
       this.window.loadURL(
         showLibraryDefault
-          ? 'http://localhost:27232/#/library'
-          : 'http://localhost:27232'
+          ? 'http://localhost:41342/#/library'
+          : 'http://localhost:41342'
       );
     }
   }
@@ -330,6 +330,14 @@ class Background {
 
     this.window.on('moved', () => {
       this.store.set('window', this.window.getBounds());
+    });
+
+    this.window.on('maximize', () => {
+      this.window.webContents.send('isMaximized', true);
+    });
+
+    this.window.on('unmaximize', () => {
+      this.window.webContents.send('isMaximized', false);
     });
 
     this.window.webContents.on('new-window', function (e, url) {

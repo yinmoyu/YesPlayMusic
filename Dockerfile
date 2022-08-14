@@ -25,6 +25,9 @@ RUN echo $'server { \n\
   } \n\
   \n\
   location /api/ { \n\
+  proxy_buffer_size 128k; \n\
+  proxy_buffers 16 32k; \n\
+  proxy_busy_buffers_size 128k; \n\
   proxy_set_header  Host $host; \n\
   proxy_set_header  X-Real-IP $remote_addr; \n\
   proxy_set_header  X-Forwarded-For $remote_addr; \n\
@@ -34,9 +37,11 @@ RUN echo $'server { \n\
   } \n\
   }' > /etc/nginx/conf.d/default.conf
 
-RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/main libuv \
+COPY --from=build /app/package.json /usr/local/lib/
+
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/main libuv jq \
   && apk add --no-cache --update-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/main nodejs npm \
-  && npm i -g NeteaseCloudMusicApi
+  && npm i -g NeteaseCloudMusicApi@"$(jq -r '.dependencies.NeteaseCloudMusicApi' /usr/local/lib/package.json)"
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
